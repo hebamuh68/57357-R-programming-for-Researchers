@@ -1,0 +1,12 @@
+R_packages
+
+Introduction to R-part1-1.pdf
+
+# Ignore R-specific files
+.Rhistory
+.RData
+
+# Ignore temporary files
+*.Rproj.user/
+
+"datasets for R"/
