@@ -1,6 +1,6 @@
 # R Programming for Researchers
 
-This repository is part of the R Programming for Researchers course organized by 57357 Children's Cancer Hospital Foundation Egypt and BioNetMasr. The course aims to build researchers' skills in R, focusing on handling, analyzing, and professionally presenting data. The examples provided here focus on practical data analysis.
+This repository contains my notes for the R Programming for Researchers course, organized by the 57357 Children's Cancer Hospital Foundation Egypt and BioNetMasr. The focus of these notes is on practical applications of R in handling, analyzing, and visualizing data.
 
 <br></br>
 
