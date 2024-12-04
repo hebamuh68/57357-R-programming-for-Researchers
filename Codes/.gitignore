@@ -1,0 +1,8 @@
+# Ignore R-specific files
+.Rhistory
+.RData
+
+# Ignore temporary files
+*.Rproj.user/
+
+
