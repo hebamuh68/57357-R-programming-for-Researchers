@@ -4,9 +4,9 @@ In the context of missing data, it's important to understand different types of 
 
 ## 1. **MCAR (Missing Completely at Random)**
 
-- **Definition**: Data is missing completely at random (MCAR) when the likelihood of a data point being missing is unrelated to either the observed or unobserved data. In other words, the missing values are entirely random and do not follow any systematic pattern.
+- **Definition**: Data is MCAR when the missing values are completely random and do not depend on the observed or unobserved data.
   
-- **Example**: Imagine a survey where some responses are missing due to technical issues (e.g., the server randomly drops some responses). The missing responses are not related to any particular characteristic of the respondents, and there's no reason to believe that any specific group is more likely to have missing values.
+- **Example**:  Imagine a dataset where the age or motor scores for some Parkinson's patients are missing randomly due to technical issues (e.g., sensor failure).
   
 - **Implication**: If data is MCAR, you can generally handle missing data by ignoring or omitting the missing values (e.g., using the `na.omit()` function in R). The missingness does not introduce bias into the analysis.
   
@@ -14,9 +14,9 @@ In the context of missing data, it's important to understand different types of 
 
 ## 2. **MAR (Missing at Random)**
 
-- **Definition**: Data is missing at random (MAR) when the probability of missing data depends on the observed data, but not on the unobserved data. In other words, the missingness can be explained by other variables in the dataset that are observed.
+- **Definition**: Data is MAR when the missingness is related to the observed data but not the missing values themselves.
   
-- **Example**: In a survey about income, the data might be missing for individuals who are less likely to answer income-related questions. If missingness is related to observed variables (e.g., people in a certain income group are more likely to omit their income), then it's MAR.
+- **Example**: Suppose the data for the "motor_score" is missing more frequently for younger patients. The missingness is related to the observed "age" but not to the motor score itself.
   
 - **Implication**: If data is MAR, more advanced techniques like imputation (e.g., replacing missing values based on other observed data) are used. You could use methods such as multiple imputation or maximum likelihood estimation to handle the missing data appropriately.
   
@@ -24,9 +24,9 @@ In the context of missing data, it's important to understand different types of 
 
 ## 3. **MNAR (Missing Not at Random)**
 
-- **Definition**: Data is missing not at random (MNAR) when the probability of missing data is related to the unobserved data itself. In other words, the missingness depends on the values that are missing.
+- **Definition**: Data is MNAR when the missingness is related to the unobserved data itself. This is the hardest type of missing data to handle.
   
-- **Example**: Suppose people with very high or very low incomes are less likely to report their income in a survey. In this case, the missingness of the income data is related to the value of the income itself (it is dependent on the unobserved value), which makes it MNAR.
+- **Example**: Suppose the motor score is missing more often for patients with severe symptoms because they are less likely to complete the survey. Here, the missingness depends on the severity of the motor score itself, which is unobserved.
   
 - **Implication**: MNAR is the most difficult type of missingness to handle because you need to account for the missing values based on what they might have been. Traditional imputation techniques do not work well here. Specialized modeling techniques, such as selection models or pattern-mixture models, are often used to handle MNAR data.
   
