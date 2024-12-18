@@ -8,8 +8,6 @@
 # Ignore files in Day1 directory
 /Codes/Day1/.Rproj.user
 
-# Ignore files in "datasets for R" directory
-"datasets for R"/
 
 # Ignore R_packages directory
 R_packages
