@@ -1,3 +1,7 @@
+# **Data**
+This dataset is composed of a range of biomedical voice measurements from 31 people, 23 with Parkinson's disease (PD). Each column in the table is a particular voice measure, and each row corresponds to one of 195 voice recordings from these individuals ("name" column). The main aim of the data is to discriminate healthy people from those with PD, according to the "status" column which is set to 0 for healthy and 1 for PD.
+
+<br></br>
 # **Dataset Composition**
 This dataset is used to study Parkinson’s disease and includes patient information and various acoustic and clinical features derived from their voice recordings.
 
@@ -47,3 +51,7 @@ These are advanced measurements used to capture nonlinear and dynamic properties
 - **Other Features**:
   - `D2`: A nonlinear measure capturing the complexity of vocal signal dynamics.
   - `PPE` (Pitch Period Entropy): Quantifies the irregularity in pitch period.
+
+<br></br>
+#### **Citation**
+Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection', Little MA, McSharry PE, Roberts SJ, Costello DAE, Moroz IM. BioMedical Engineering OnLine 2007, 6:23 (26 June 2007)
