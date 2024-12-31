@@ -5,8 +5,12 @@ This repository contains my notes for the R Programming for Researchers course, 
 <br></br>
 
 ## Repository Structure
-- [Day 1](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1): Focusing on reading different types of data.
+- [1) Introduction to R](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1_read_files)
+- [3) Data Types](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day2_data_types)
+- [3) Data Manibulation](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day3_data_manibulation)
+- [4) Graphics](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day4_Graphics)
 
+  
 <br></br>
 
 ## Getting Started
