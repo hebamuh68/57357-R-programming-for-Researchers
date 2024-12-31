@@ -1,0 +1,6 @@
+Patient_ID,Age,Tremor_Severity,UPDRS_Score,Dopamine_Level_ng_ml
+P001,65,Mild,25,180
+P002,72,Moderate,45,120
+P003,58,Severe,60,90
+P004,69,Moderate,50,110
+P005,74,Severe,70,85

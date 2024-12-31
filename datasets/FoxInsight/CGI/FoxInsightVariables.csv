@@ -1,0 +1,3 @@
+variable,variable_description,category
+CGINONPD,"With respect to your overall health, how would you describe yourself now compared to your last study visit?","Clinical Global Impression of Change (Non-PD)"
+CGIPD,"With respect to your Parkinson's disease condition, how would you describe yourself now compared with your last study visit?","Clinical Global Impression of Change (PD)"

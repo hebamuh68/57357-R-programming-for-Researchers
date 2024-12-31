@@ -8,6 +8,8 @@
 # Ignore files in Day1 directory
 /Codes/Day1/.Rproj.user
 
+# Ignore files in "Materials" directory
+"Materials"/
 
 # Ignore R_packages directory
 R_packages
