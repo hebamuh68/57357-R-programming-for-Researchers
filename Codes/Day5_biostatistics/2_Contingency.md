@@ -1,4 +1,22 @@
-# **Frequency and Contingency Tables (Cross Tabulation)**  
+Here's an enhanced version of your material on **Biostatistics with R Language**, focused on improving clarity, organization, and instructional flow. Let me know if you'd like further customization!
+
+---
+
+# **Biostatistics with R Language**  
+### **Sameh Magdeldin, M.V.Sc, 2Ph.D**  
+**January 2025**  
+
+---
+
+## **Part 2: Frequency and Contingency Tabulation**  
+In this section, we will cover:  
+1. **Frequency and Contingency Tables** (Cross Tabulation).  
+2. **Tests of Independence** (Chi-square, Fisher Exact, Cochran-Mantel-Haenszel).  
+3. **Measuring Association** for two-way contingency tables.
+
+---
+
+### **Frequency and Contingency Tables (Cross Tabulation)**  
 Cross-tabulation is a method used for categorical variables (e.g., `Male`, `Female`). Here, we will extract and summarize subsets of data using the **`vcd`** package.
 
 ---
@@ -131,3 +149,15 @@ ftable(addmargins(prop.table(multi, c(1, 3)), 2)) * 100
 ### **Key Notes on Contingency Tables**  
 1. **Contingency tables** provide frequencies, proportions, and percentages for combinations of variables.  
 2. However, they **do not determine relationships or independence** between variables.
+
+---
+
+### **Next: Tests of Independence**  
+To evaluate relationships among categorical data, we use:  
+1. **Chi-Square Test**.  
+2. **Fisher's Exact Test**.  
+3. **Cochran-Mantel-Haenszel Test**.
+
+---
+
+Let me know if you’d like to continue with the next topic or adjust this structure further!
