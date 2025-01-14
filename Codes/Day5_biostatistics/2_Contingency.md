@@ -1,14 +1,4 @@
-Here's an enhanced version of your material on **Biostatistics with R Language**, focused on improving clarity, organization, and instructional flow. Let me know if you'd like further customization!
-
----
-
-# **Biostatistics with R Language**  
-### **Sameh Magdeldin, M.V.Sc, 2Ph.D**  
-**January 2025**  
-
----
-
-## **Part 2: Frequency and Contingency Tabulation**  
+# **Part 2: Frequency and Contingency Tabulation**  
 In this section, we will cover:  
 1. **Frequency and Contingency Tables** (Cross Tabulation).  
 2. **Tests of Independence** (Chi-square, Fisher Exact, Cochran-Mantel-Haenszel).  
