@@ -5,12 +5,21 @@ This repository contains my notes for the R Programming for Researchers course, 
 <br></br>
 
 ## Repository Structure
-- [1) Introduction to R](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1_read_files)
+- [1) Read_files](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1_read_files)
 - [3) Data Types](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day2_data_types)
 - [3) Data Manibulation](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day3_data_manibulation)
 - [4) Graphics](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day4_Graphics)
+- [5) Biostatistics](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1_read_files)
+- [6) Life Models for Data Analysis](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day2_data_types)
+- [7) Correlation](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day3_data_manibulation)
+- [8) Regression](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day4_Graphics)
+- [9) PCA and PLS](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1_read_files)
+- [10) ROC Curve](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day2_data_types)
+- [11) ML](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day3_data_manibulation)
+- [12) Sample Size Calculation](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day4_Graphics)
+- [13) Survival Analysis](https://github.com/hebamuh68/R-programming-for-Researchers/tree/main/Codes/Day1_read_files)
 
-  
+
 <br></br>
 
 ## Getting Started
