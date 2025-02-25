@@ -1,0 +1,430 @@
+---
+title: "Real Data Analysis"
+author: "Ahmed Karam"
+date: "2025-01-24"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+# Methylprednisolone Data Analysis
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r}
+library(dplyr)
+
+library(ggplot2)
+
+library(reshape2)
+
+```
+
+```{r}
+
+library(readxl)
+
+methylprednisolone <- read_excel("methylprednisolone.xlsx", 
+    sheet = "Lembar1", 
+    range = "A1:AF39")
+
+View(methylprednisolone)
+
+```
+
+# Format Check
+```{r}
+
+for_analysis <- methylprednisolone
+
+head(for_analysis)
+str(for_analysis)
+
+for_analysis$Group[for_analysis$Group == 1] <- 'methylprednisolone'
+for_analysis$Group[for_analysis$Group == 2] <- 'placebo'
+
+for_analysis$Sex[for_analysis$Sex == 1] <- "Male"
+for_analysis$Sex[for_analysis$Sex == 2] <- "Female"
+
+for_analysis$`Birth delivered`[for_analysis$`Birth delivered` == 1] <- "C-section"
+for_analysis$`Birth delivered`[for_analysis$`Birth delivered` == 2] <- "Spontaneous"
+
+unique(for_analysis$Group)
+unique(for_analysis$Sex)
+unique(for_analysis$`Birth delivered`)
+
+methylprednisolone_group <- for_analysis$Group == 'methylprednisolone'
+placebo_group <- for_analysis$Group == 'placebo'
+
+for_analysis
+
+for_analysis <- for_analysis %>%
+  mutate(across(everything(), ~ gsub(",", ".", ., fixed = TRUE)))
+
+```
+
+# 
+```{r}
+
+mean_and_sd_info <- for_analysis %>% 
+  group_by(Group) %>% 
+  summarise(across(`Age (week)`, list(Mean=mean, SD=sd))) %>% 
+  mutate(across(2:3, function(x) {round(x, digits = 2)}))
+
+mean_and_sd_info
+
+write.csv(mean_and_sd_info, 'results-1-mean_and_sd_info.csv')
+
+```
+
+# 
+```{r}
+
+group_counts <- for_analysis %>% 
+  group_by(Group) %>% 
+  count(Sex)
+
+group_counts
+
+```
+
+# 
+```{r}
+
+group_percentage <- for_analysis %>% 
+  group_by(Group) %>% 
+  count(Sex) %>% 
+  group_by(Group) %>% 
+  mutate(across(n, function(x) {x / sum(x) * 100})) %>% 
+  mutate(across(n, function(x) {round(x, digits = 2)}))
+
+group_percentage
+
+```
+
+# Basic characteristics of study participants
+
+## Age (Independent sample t-test)
+
+```{r}
+
+colnames(for_analysis)
+
+AGE <- for_analysis %>% 
+  select(all_of("Age (week)"))
+
+g1 <- AGE[methylprednisolone_group,]
+g2 <- AGE[placebo_group,]
+
+g1_vector <- unlist(g1)
+g2_vector <- unlist(g2)
+
+shapiro.test(g1_vector)
+shapiro.test(g2_vector)
+
+t.test(g1_vector, g2_vector)
+
+```
+
+## Onset of jaundice (Mann–Whitney Test)
+
+```{r}
+
+colnames(for_analysis)
+
+OFJ <- for_analysis %>% 
+  select(all_of("Onset of jaundice (week)"))
+
+g1 <- OFJ[methylprednisolone_group,]
+g2 <- OFJ[placebo_group,]
+
+g1_vector <- unlist(g1)
+g2_vector <- unlist(g2)
+
+shapiro.test(g1_vector)
+shapiro.test(g2_vector)
+
+suppressWarnings(wilcox.test(g1_vector,g2_vector))
+
+```
+
+## Gender (Chi-square tests)
+
+```{r}
+
+colnames(for_analysis)
+
+GENDER <- for_analysis %>% 
+  select(all_of(c("Group","Sex")))
+
+tableGENDER <- table(GENDER)
+
+chisq.test(tableGENDER)
+
+```
+
+## Birth delivered
+
+```{r}
+
+colnames(for_analysis)
+
+GENDER <- for_analysis %>% 
+  select(all_of(c("Group","Birth delivered")))
+
+tableGENDER <- table(GENDER)
+
+chisq.test(tableGENDER)
+
+```
+
+## Duration of illness (Independent sample t-test)
+
+```{r}
+
+colnames(for_analysis)
+
+DOI <- for_analysis %>% 
+  select(all_of("Duration of illness (mingu)"))
+
+g1 <- DOI[methylprednisolone_group,]
+g2 <- DOI[placebo_group,]
+
+g1_vector <- unlist(g1)
+g2_vector <- unlist(g2)
+
+shapiro.test(g1_vector)
+shapiro.test(g2_vector)
+
+t.test(g1_vector, g2_vector)
+
+```
+
+## Birth weight (Mann–Whitney Test)
+
+```{r}
+
+colnames(for_analysis)
+
+BW <- for_analysis %>% 
+  select(all_of("Birth weight (gram)"))
+
+g1 <- BW[methylprednisolone_group,]
+g2 <- BW[placebo_group,]
+
+g1_vector <- unlist(g1)
+g2_vector <- unlist(g2)
+
+shapiro.test(g1_vector)
+shapiro.test(g2_vector)
+
+suppressWarnings(wilcox.test(g1_vector,g2_vector))
+
+```
+
+# Basic laboratory measurements before intervention
+
+```{r}
+
+ttest_function <- function(dataFrame, colName, groupOne, groupTwo) {
+  
+  selectedCols <- dataFrame %>% 
+    select(all_of(colName))
+  
+  g1 <- selectedCols[groupOne,]
+  g2 <- selectedCols[groupTwo,]
+  
+  g1_vector <- as.numeric(unlist(g1))
+  g2_vector <- as.numeric(unlist(g2))
+  
+  output_data_frame <- data.frame(
+    Variable = colName,
+    
+    Shapiro_variable_1_p_value = shapiro.test(g1_vector)$p.value,
+    Shapiro_variable_2_p_value = shapiro.test(g2_vector)$p.value,
+    
+    t_test_p_value = t.test(g1_vector, g2_vector)$p.value
+  )
+  
+  print(output_data_frame)
+  
+  mmmms <- for_analysis %>% 
+  group_by(Group) %>% 
+  select(all_of(c(colName))) %>% 
+  mutate(across(1,as.numeric)) %>% 
+  summarise(across(1,list(Median=median, Min=min, Max=max, Mean=mean, SD=sd)))
+  
+  print(mmmms)
+  }
+
+ttest_function(for_analysis, "Hb", methylprednisolone_group, placebo_group)
+ttest_function(for_analysis, "WBC(10^3)", methylprednisolone_group, placebo_group)
+ttest_function(for_analysis, "Albumin", methylprednisolone_group, placebo_group)
+
+```
+
+## 
+
+```{r}
+
+wilcox_function <- function(dataFrame, colName, groupOne, groupTwo) {
+  
+  selectedCols <- dataFrame %>% 
+    select(all_of(colName))
+  
+  g1 <- selectedCols[groupOne,]
+  g2 <- selectedCols[groupTwo,]
+  
+  g1_vector <- as.numeric(unlist(g1))
+  g2_vector <- as.numeric(unlist(g2))
+  
+  output_data_frame <- data.frame(
+    Variable = colName,
+    
+    Shapiro_variable_1_p_value = shapiro.test(g1_vector)$p.value,
+    Shapiro_variable_2_p_value = shapiro.test(g2_vector)$p.value,
+    
+    wilcox_p_value = suppressWarnings(wilcox.test(g1_vector,g2_vector))$p.value
+    )
+  
+  print(output_data_frame)
+  
+  mmmms <- for_analysis %>% 
+    group_by(Group) %>% 
+    select(all_of(c(colName))) %>% 
+    mutate(across(1,as.numeric)) %>% 
+    summarise(across(1,list(Median=median, Min=min, Max=max, Mean=mean, SD=sd)))
+  
+  print(mmmms)
+  }
+
+wilcox_function(for_analysis, "APTT", methylprednisolone_group, placebo_group)
+wilcox_function(for_analysis, "PPT", methylprednisolone_group, placebo_group)
+
+```
+
+# Basic laboratory measurements before intervention
+
+```{r}
+
+ttest_paired_function <- function(dataFrame, colNameOne, colNameTwo, theGroup, theGroupName) {
+  
+  selectedCols <- dataFrame %>% 
+    select(all_of(c(colNameOne,colNameTwo)))
+  
+  g1 <- selectedCols[theGroup,colNameOne]
+  g2 <- selectedCols[theGroup,colNameTwo]
+  
+  g1_vector <- as.numeric(unlist(g1))
+  g2_vector <- as.numeric(unlist(g2))
+  
+  print(selectedCols[theGroup,])
+  
+  mmmms <- for_analysis %>% 
+    group_by(Group) %>% 
+    select(all_of(c(colNameOne,colNameTwo))) %>% 
+    mutate(across(1:2,as.numeric)) %>% 
+    summarise(across(1:2,list(Median=median, Min=min, Max=max, Mean=mean, SD=sd)))
+  
+  print(mmmms)
+  
+  boxplot_dataframe <- data.frame(
+    variable = c(rep(colNameOne, length(g1_vector)), rep(colNameTwo,length(g2_vector))),
+    value = c(g1_vector, g2_vector)
+  )
+  
+  draw_plot <- ggplot(boxplot_dataframe,aes(x=reorder(variable, order(factor(variable), decreasing = T)), y=value)) + 
+    geom_boxplot() + geom_jitter() + theme_minimal() + xlab('variable')
+  
+  print(draw_plot)
+  
+  output_data_frame <- data.frame(
+    Variable_before = colNameOne,
+    Variable_after = colNameTwo,
+    
+    Shapiro_variable_1_p_value = shapiro.test(g1_vector)$p.value,
+    Shapiro_variable_2_p_value = shapiro.test(g2_vector)$p.value,
+    
+    t_test_p_value = t.test(g1_vector,g2_vector,paired=T)$p.value
+    )
+  
+  print(output_data_frame)
+  
+  write.csv(output_data_frame, sprintf('ttest_paired_function-%s-%s-%s.csv', colNameOne, colNameTwo, theGroupName), row.names=F)
+  
+}
+
+ttest_paired_function(for_analysis, "Direct bilirubin-pre",
+                    "Direct bilirubin-post", placebo_group, "placebo_group")
+
+ttest_paired_function(for_analysis, "Total bilirubin-pre", "Total bilirubin-post", placebo_group, "placebo_group")
+
+ttest_paired_function(for_analysis, "AST-pre", "AST-post", methylprednisolone_group, "methylprednisolone_group")
+
+```
+
+## 
+
+```{r}
+wilcox_paired_function <- function(dataFrame, colNameOne, colNameTwo, theGroup, theGroupName) {
+  
+  selectedCols <- dataFrame %>% 
+    select(all_of(c(colNameOne,colNameTwo)))
+  
+  g1 <- selectedCols[theGroup,colNameOne]
+  g2 <- selectedCols[theGroup,colNameTwo]
+  
+  g1_vector <- as.numeric(unlist(g1))
+  g2_vector <- as.numeric(unlist(g2))
+  
+  print(selectedCols[theGroup,])
+  
+  mmmms <- for_analysis %>% 
+    group_by(Group) %>% 
+    select(all_of(c(colNameOne,colNameTwo))) %>% 
+    mutate(across(1:2,as.numeric)) %>% 
+    summarise(across(1:2,list(Median=median, Min=min, Max=max, Mean=mean, SD=sd)))
+  
+  print(mmmms)
+  
+  boxplot_dataframe <- data.frame(
+    variable = c(rep(colNameOne, length(g1_vector)), rep(colNameTwo,length(g2_vector))),
+    value = c(g1_vector, g2_vector)
+  )
+  
+  draw_plot <- ggplot(boxplot_dataframe,aes(x=reorder(variable, order(factor(variable), decreasing = T)), y=value)) + geom_boxplot() + geom_jitter() + theme_minimal() + xlab('variable')
+  
+  print(draw_plot)
+  
+  output_data_frame <- data.frame(
+    Variable_before = colNameOne,
+    Variable_after = colNameTwo,
+    
+    Shapiro_variable_1_p_value = shapiro.test(g1_vector)$p.value,
+    Shapiro_variable_2_p_value = shapiro.test(g2_vector)$p.value,
+    
+    Wilcox_test_p_value = suppressWarnings(wilcox.test(g1_vector,g2_vector,paired=T))$p.value
+    )
+  
+  print(output_data_frame)
+  
+  write.csv(output_data_frame, sprintf('wilcox_paired_function-%s-%s-%s.csv', colNameOne, colNameTwo, theGroupName), row.names=F)
+  
+}
+
+wilcox_paired_function(for_analysis, "Direct bilirubin-pre", "Direct bilirubin-post", methylprednisolone_group, "methylprednisolone_group")
+
+wilcox_paired_function(for_analysis, "Total bilirubin-pre", "Total bilirubin-post", methylprednisolone_group, "methylprednisolone_group")
+
+wilcox_paired_function(for_analysis, "AST-pre", "AST-post", placebo_group, "placebo_group")
+
+wilcox_paired_function(for_analysis, "GGT-pre", "GGT-post", placebo_group, "placebo_group")
+
+wilcox_paired_function(for_analysis, "GGT-pre", "GGT-post", methylprednisolone_group, "methylprednisolone_group")
+
+```
+

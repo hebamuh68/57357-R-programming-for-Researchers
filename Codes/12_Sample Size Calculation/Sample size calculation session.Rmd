@@ -1,0 +1,109 @@
+---
+title: "Sample Size Calculation session"
+author: "Hoda Aufy"
+date: "2025-02-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+#Why do we need Sample size calculation?
+In Designing an experiment, One of the key questions is:
+How many samples do I need to conduct my study?
+Too small a sample size: Risks failing to detect the effect of interest.
+Too large a sample size: Leads to unnecessary waste of time and resources.
+
+The Goal of Sample Size Calculation:
+To determine the optimal number of samples that:
+Ensures a reasonable chance of detecting a true effect.
+Avoids wasting limited resources on excessive sampling.
+
+#Key Points of Sample Size Calculation:
+
+#Effect Size:
+Measures the magnitude of the effect or difference you expect to observe.
+The Larger the effect sizes , the easier it is to detect an effect and require fewer samples
+#Power (1 - β): 
+The probability of detecting a true effect when it exists .
+Typically set to 0.8 (80%), meaning there's an 80% chance of detecting the effect.
+The higher the power, the more likely it is to detect an effect if present and the more samples needed.
+#Significance Level (α):
+The threshold for rejecting the null hypothesis .
+Commonly set at 0.05, indicating a 5% risk of a false positive. 
+ The lower the significance level, the more likely it is to avoid a false positive and the more samples needed.
+
+#Relationship between Sample size calculation and Primary aim of study:
+The primary aim of a study plays a crucial role in determining the appropriate sample size, as it directly influences the study design, statistical power, and reliability of results.
+
+#Sample Size calculation using R:
+
+```{r}
+install.packages("pwr")
+library(pwr)
+```
+
+#for comparing 2 means (t-tests):
+```{r}
+pwr.t.test(d = 0.5, power = 0.8, sig.level = 0.05, type = "two.sample")
+
+
+```
+d= effect size
+
+#For comparing more than 2 means (ANOVA):
+```{r}
+pwr.anova.test(k = 3, f = 0.25, power = 0.8, sig.level = 0.05)
+```
+k=Number of groups
+f= effect size
+
+# For comparing 2 proportions:
+```{r}
+power.prop.test(p1=0.45,p2=0.12,sig.level = 0.05,power = 0.8)
+```
+p1= prevalence of your interest in group 1
+p2= prevalence of your interest in group 2
+
+#For correlation studies:
+```{r}
+pwr.r.test(r = 0.3, power = 0.8, sig.level = 0.05)
+```
+r= Expected correlation coffecient
+
+#For questionnaire (survey) based studies:
+```{r}
+install.packages("survey")
+library(survey)
+z= 1.96
+p= 0.5
+e=0.05
+n <- (z^2 * p * (1 - p)) / e^2
+ceiling(n)
+```
+
+z= z-score #z=1.96 if your confidence level is 95%
+p= estimated proportions
+e= marrgin error
+
+#Sample Size for Diagnostic tests:
+```{r}
+install.packages("SampleSizeDiagnostics")
+library(SampleSizeDiagnostics)
+sn=0.9
+sp=0.85
+p=0.2
+
+SampleSizeDiagnostics(sn, sp, p, w = 0.1, CI = 0.95)
+```
+
+sn= sensitivity of diagnostic test
+sp=specificity of diagnostic test
+p= prevalence of disease
+w= desired width of confidence interval (default is 0.1) ## unless it is mentioned in the reference.
+CI= confidence interval level.
+
+
+

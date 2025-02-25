@@ -1,0 +1,421 @@
+---
+title: "R recap"
+author: "Nada"
+date: "2025-01-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(psych)
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(ggpubr)
+library(grid)
+library(vcd)
+library(magrittr) 
+library(car)
+library(plyr)
+library(RColorBrewer)
+library(gplots)
+library(GGally)
+```
+
+```{r}
+data = read.csv("Cancer_Prediction_Dataset_for _Model_1.csv")
+```
+
+
+Three time-point dataset of pancreatic cancer patients and control group with their clinical data and metabolite expression
+
+```{r}
+head(data)
+```
+
+What are the summary statistics for each variable (age, BMI, HbA1c_level, blood_glucose_level)?
+
+```{r}
+summary(data)
+```
+```{r}
+dim(data)
+```
+
+
+
+>> What are the counts or percentages for categorical variables (gender, hypertension, heart_disease, smoking_history)?
+
+```{r}
+# Gender distribution
+table(data$gender)
+prop.table(table(data$gender)) * 100
+```
+```{r}
+# Hypertension distribution
+table(data$hypertension)
+prop.table(table(data$hypertension)) * 100
+
+```
+
+
+```{r}
+# Heart disease distribution
+table(data$heart_disease)
+prop.table(table(data$heart_disease)) * 100
+```
+
+
+```{r}
+# Smoking history
+table(data$smoking_history)
+prop.table(table(data$smoking_history)) * 100
+
+```
+
+
+
+>> the distribution of the Pancreatic Cancer patients according to smoking_history
+
+```{r}
+t1 = table(data$smoking_history,data$Pancreatic_Cancer)
+prop.table(t1)
+```
+
+
+>> checking for the outliers and are they really outliers?
+
+```{r}
+melted <- melt(data[, c("age", "bmi", "HbA1c_level", "blood_glucose_level")], variable.name = "Variable", value.name = "Value")
+```
+
+```{r}
+ggplot(melted, aes(x = Variable, y = log(Value), fill = Variable)) +
+  geom_boxplot( alpha = 0.7) + 
+  geom_jitter(width = 0.2, color = "black", alpha = 0.5, size = 1) +  
+  labs(
+    title = "Boxplot of clinical data ",
+    y = "Values",
+    fill = "Variables"
+  ) + 
+  theme_minimal() +  
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),  
+  ) +
+  scale_fill_brewer(palette = "Pastel1") +  
+  coord_flip() 
+```
+
+
+>> is there any relation between the clinical data and the Pancreatic_Cancer?
+
+```{r}
+# Gender and Pancreatic_Cancer
+table(data$gender, data$Pancreatic_Cancer)
+chisq.test(table(data$gender, data$Pancreatic_Cancer))
+```
+
+```{r}
+# Hypertension and Pancreatic_Cancer
+table(data$hypertension, data$Pancreatic_Cancer)
+chisq.test(table(data$hypertension, data$Pancreatic_Cancer))
+```
+
+```{r}
+# glucose level and Pancreatic_Cancer
+table(data$blood_glucose_level, data$Pancreatic_Cancer)
+chisq.test(table(data$blood_glucose_level, data$Pancreatic_Cancer))
+```
+
+```{r}
+# HbA1c_level and Pancreatic_Cancer
+table(data$HbA1c_level, data$Pancreatic_Cancer)
+chisq.test(table(data$HbA1c_level, data$Pancreatic_Cancer))
+
+```
+
+
+# 0 to 0.1: Weak association
+# 0.1 to 0.3: Moderate association
+# > 0.3: Strong association
+
+
+>> checking the strength  of the relation between them
+
+```{r}
+assocstats(table(data$blood_glucose_level, data$Pancreatic_Cancer))
+```
+```{r}
+assocstats(table(data$HbA1c_level, data$Pancreatic_Cancer))
+```
+
+
+
+```{r}
+rownames(data) = data$Sample
+data$Sample = NULL 
+```
+
+
+>> normalize the expression value for the metabolites with median normalization 
+
+```{r}
+median_normalization = apply(data[,10:length(data)], 1, function(x) {
+  med <- median(x, na.rm = TRUE)  
+  x / med                       
+})
+```
+
+```{r}
+CTRL = as.data.frame(median_normalization) %>% select(contains('ctrl')) %>% colMeans() %>% shapiro.test
+D0 = as.data.frame(median_normalization) %>% select(contains('D0')) %>% colMeans() %>% shapiro.test
+D15 = as.data.frame(median_normalization) %>% select(contains('D15')) %>% colMeans() %>% shapiro.test
+D30 = as.data.frame(median_normalization) %>% select(contains('D30')) %>% colMeans() %>% shapiro.test
+CTRL
+D0
+D15
+D30
+```
+
+>> Non-parametric 
+
+
+```{r}
+qqnorm(median_normalization, main = "QQ Plot of normalized metabolites expression")
+```
+
+```{r}
+heatmap( median_normalization )
+```
+
+```{r}
+scaled = scale(median_normalization)
+head(scaled)
+```
+
+```{r}
+qqnorm(scaled, main = "QQ Plot of the scaled normalized metabolites expression")
+```
+
+
+>> prepossessing the expression of the metabolites 
+
+re-merging the clinical data and the expression values to filter samples with NAs  
+
+```{r}
+processed_data = merge(data[,1:9],t(scaled), by = "row.names")
+```
+
+```{r}
+rownames(processed_data) = processed_data$Row.names
+processed_data$Row.names = NULL
+```
+
+
+```{r}
+rowSums(is.na(processed_data))
+```
+
+
+in Control group there are missing values in 2 samples 22 and 25 
+in Do there are no missing values BUT 
+in D15 there are 2 samples with missing values 6 and 18 and in D30 there are 3 samples with missing values 11, 21 and 22 
+So we need to exclude these samples from our analysis..
+
+
+>> samples (6,18,11,21,22,25) will be deleted
+
+1- creating two new columns Sample label and Sample Number.
+
+```{r}
+processed_data$sample_number = sapply(strsplit(rownames(processed_data), "_"), function(x) x[2])
+processed_data$label = sapply(strsplit(rownames(processed_data), "_"), function(x) x[1])
+```
+
+2- We will remove samples with NAs from all groups as we can't work on time points that have missing values at a specific time point for a patient.
+
+```{r}
+filtered_data = processed_data[!processed_data$sample_number %in% c(6,18,11,21,22,25),]
+```
+
+
+>> checking the NAs again 
+
+```{r}
+rowSums(is.na(filtered_data))
+```
+
+```{r}
+head(filtered_data)
+```
+
+
+>> now let's work on checking the significance between the groups
+    by extracting the metabolite values again and creating a vector with the group label
+
+```{r}
+metabolites <- filtered_data[, 10:(ncol(filtered_data)-2)] 
+
+labels <- as.factor(filtered_data$label)   
+```
+
+
+
+>> we have 4 non-parametric groups so we will use kruskal-wallis test
+
+```{r}
+kruskal_results <- apply(metabolites, 2, function(metabolite) {
+  kruskal_test <- kruskal.test(metabolite ~ labels) 
+  return(c( "P_Value" = kruskal_test$p.value))
+})
+```
+
+
+
+creating a df for the metabolites and their p.value
+
+```{r}
+kruskal_results_df <- as.data.frame(kruskal_results, row.names = names(kruskal_results))
+colnames(kruskal_results_df) <- c( "P_Value")
+```
+
+>> subsetting the df with the significant proteins (p.value < 0.05)
+
+```{r}
+kruskal_significant_results <- subset(kruskal_results_df, P_Value < 0.05)
+kruskal_significant_results
+```
+
+```{r}
+dim(kruskal_significant_results)
+```
+we have 74 significant metabolite between the 4 groups 
+
+
+
+>> now what about checking the signifcane between the time points itself
+ 
+we need to create a new df for the 3 groups only  
+ 
+```{r}
+time_points_data <- filtered_data[filtered_data$label %in% c("D0", "D15", "D30"), ]
+
+metabolites_time_points <- time_points_data[, 10:ncol(time_points_data)]
+
+labels_time_points <- time_points_data$label
+```
+
+
+now we will melt the data with the sample number and the label columns we have created
+>> each sample must has same number or name between the groups  
+
+```{r}
+long_data <- melt(metabolites_time_points)
+head(long_data)
+```
+
+
+>> now let's test the significance between the 3 timepoints with Friedman test
+
+```{r}
+#Friedman test per metabolite
+friedman_results <- by(long_data, ~ variable, function(data) {
+  friedman_test <- friedman.test(value ~ label | sample_number, data = data)
+  return(c("P_Value" = friedman_test$p.value))
+})
+```
+
+
+```{r}
+friedman_results_df <- as.data.frame(friedman_results, row.names = names(friedman_results))
+colnames(friedman_results_df) <- c("P_Value")
+```
+
+>> as we did in kruskal, let's subset the significant proteins 
+
+```{r}
+friedman_significant_results <- subset(friedman_results_df, P_Value < 0.05)
+```
+
+```{r}
+dim(friedman_significant_results)
+```
+there are 66 significant metabolite 
+
+
+
+
+>> drawing a heatmap for friedman_significant_results using the raw values 
+  1- extracting the significant metabolites from the data 
+  2- extracting the used samples in the used groups (d0,d15,d30)
+  3- creating a df for them 
+
+
+```{r}
+data = t(data)
+significant_rows <- rownames(data) %in% rownames(friedman_significant_results)
+significant_columns <- colnames(data) %in% colnames(t(metabolites_time_points))
+
+significant_between_timepoints <- as.data.frame(data[significant_rows, significant_columns])
+```
+
+```{r}
+dim(significant_between_timepoints)
+```
+
+```{r}
+str(significant_between_timepoints)
+```
+
+
+```{r}
+numeric_matrix <-  apply(significant_between_timepoints,2,as.numeric)
+rownames(numeric_matrix) = rownames(significant_between_timepoints)
+```
+
+```{r}
+heatmap.2(
+  numeric_matrix,
+  col = colorRampPalette(c("blue", "white", "red"))(200),  
+  trace = "none",    
+  scale = "row",
+  dendrogram = "both",  
+  main = "Significant metabolites Between Timepoints",
+  density.info = "none", 
+  labCol = colnames(numeric_matrix),  
+  labRow = rownames(numeric_matrix)  
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

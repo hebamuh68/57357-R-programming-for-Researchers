@@ -1,0 +1,384 @@
+---
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+## Correlation using R langauge
+
+Author: Sameh MAGDELDIN
+
+Module contents:
+
+-   Correlation (Pearson, Spearman,and kendall)
+
+-   Correlation matrix
+
+------------------------------------------------------------------------
+
+### Packages needed in this tutorial
+
+```{r,warning=FALSE,message=FALSE}
+library("MASS")  # this datasets is found in MASS package or u can load it directly
+library("ggplot2") # for plotting
+library("GGally") # an extention for ggplot2
+library("car") # for some graphical and analytical functions
+library("PerformanceAnalytics")# we will need this package for correlation later
+library("plyr") #data manipulation
+library("dplyr") #data manipulation "should be installed after plyr"
+library("RColorBrewer") #this is to give a nice coloring for ur figures
+```
+
+## Correlation
+
+### Bivariate analysis that measures the strengths of association between two variable. Correlation, in its most common form, is a measure of linear dependence; the catch is that not all dependencies are linear. Correlation implies dependence but not the reverse.
+
+### Role of Thumb [Correlation does not mean causation]
+
+####In this tutorial, we will learn how to perform correlation and regression analysis
+
+####I will use the cats dataset,, I LOVE CATS!
+
+####lets have a look on the cats dataset
+
+```{r,warning=FALSE,eval=FALSE}
+head(cats)
+summary(cats)
+```
+
+### This simple dataset reports the observation of cats body weight (kg) versus their heart weight (g)
+
+###First, lets scatter plot the cat body weight versus their heart weight
+
+```{r}
+ggplot(cats, aes(x=Bwt, y=Hwt)) + geom_point(size=5)
+```
+
+### as straight forward, check the correlation first using this ggplot code
+
+```{r}
+ggplot(cats, aes(x=Bwt, y=Hwt)) +geom_point(size=5)+geom_smooth(method=lm)
+```
+
+# in ggplot, you can control every thing. try this
+
+```{r}
+ggplot(cats, aes(x=Bwt, y=Hwt))+ geom_point(size=5)+geom_smooth(fill = "grey50", size = 3, alpha = 0.5)
+```
+
+### Because u did not set the method of adding line, R set the default "loess" [(LOcally wEighted Scatter-plot Smoother)]
+
+### Smoothing method (function) to use, accepts either NULL or e.g. "lm", "glm", "gam", "loess" or a function, e.g. MASS::rlm or mgcv::gam, stats::lm, or stats::loess.
+
+###The scatterplot shows reasonable linear relationship between the two variables.
+I can say that becasue the fitted line is raised up.
+However, it is not directed to the upper right corner.
+
+###Lets run the correlation to confirm that pattern.
+
+### Use cor function or cor.test function
+
+> Before that?
+> Which test to use?
+> Pearson for parametric data, spearman and kendall for non parametric.
+> if your data have some outliers that you suspect use non parametric test.
+
+```{r}
+cor(cats$Bwt,cats$Hwt,method="spearman")
+# spearman test for non parametric analysis. 
+# Check the normality test to see if your data falls under guassian distribution (normal; parametric) or not.
+```
+
+```{r}
+cor(cats$Bwt,cats$Hwt,method="pearson")# for parametric test
+```
+
+```{r}
+cor(cats$Bwt,cats$Hwt,method="kendall") # non parameteric
+```
+
+> Spearman and Kendall ,, yes i know what you want to say.
+> which one to use?
+> Usually using Spearman is more popular than kendall.
+> confidence intervals for Spearman are less reliable and less interpretable than confidence intervals for Kendalls, according to Kendall & Gibbons (1990).
+
+```{r}
+cor.test(cats$Bwt,cats$Hwt)
+# as u see default is pearson
+```
+
+```{r}
+cor.test(cats$Bwt,cats$Hwt,method="spearman",exact = FALSE)
+# "exact"" if you want to examine a specific p value. 
+# Here and in general we don't use it so default is FALSE
+```
+
+### what is the difference?, cor returns correlation coefficient (r) only , while cor.test gives both (r) and p value.
+
+\*\*\* Data interpretation \*\*\*
+
+### as you can see, the ***correlation coefficient (r)*** is close to 1 indicating a strong positive correlationship between cats body weight and their heart weight.
+
+> ***Hint1***: r close to 1 means positive correlation and close to -1.0 indicates negative correlation, while around 0 means no significant correlation can be seen.
+
+> ***Hint2*** correlation coefficient (r)is some times referred as "Pearson product moment correlation coefficient"
+
+> ***Hint3*** A correlation greater than 0.8 is generally described as strong, whereas a correlation less than 0.5 is generally described as weak.
+
+> ***Hint4*** Don't confuse between r and r2 (R2); r2 (R2) is called ***(Coefficient of Determination) or r squared***.
+> ***This denotes the strength of the linear association between x and y. It*** represents the percent of the data that is the closest to the line of best fit.
+
+> In essence, ( r ) tells you about the direction and strength of the relationship, while ( R\^2 ) tells you how well the data fits the model (measures the proportion of the variance in the dependent variable that is predictable from the independent variable(s).
+> It ranges from 0 to 1.).
+
+> ***Hint5*** It is not appropriate to compute r2 from the nonparametric Spearman correlation coefficient
+
+## Example [cats data]: If r = 0.80, then r2 = 0.64, which means that 64% of the total variation in cats heart weight can be explained by the linear relationship between cats body weight and their heat weight. The other 36% of the total variation in heart weight remains unexplained.
+
+| r (rs)  | Interpertation                                          |
+|---------|---------------------------------------------------------|
+| 1.0     | Perfect correlation                                     |
+| 0 to 1  | The two variables tend to increase or decrease together |
+| 0.0     | The two variables do not vary together at all           |
+| 0 to -1 | One variable increases as the other decreases           |
+| -1.0    | Perfect negative or inverse correlation                 |
+
+> \*\*\* additional details\*\*\* some ref give more detailed classification on correlation.
+> for example
+
+(r = 1): Perfect positive correlation (0.7-1): Strong positive correlation.
+(0.3-0.7): Moderate positive correlation.
+(0.1-0.3): Weak positive correlation.
+(r = 0): No correlation.
+same on the other negative side
+
+> ***Hint6*** r and R2 interpritation alone is not enough to accuratly explain your correlation data.
+> along with these parameters, you need to check the ***p value***.
+> if the p value is significant and you have some correlation pattern, then you are on the right way.
+> in some cases, p value is not significant while you can see a correlation pattern.
+> so be careful.
+
+> If you are comparing 2 variables to see their correlation [cats example, or next players example].
+> you will get the result like this
+
+### Players example (correlation between 2 variable)
+
+```{r}
+player1 <- c(1,2,3,4,5,6,7,8,9,10)
+player2 <- c(3,6,5,4,7,8,9,4,5,6)
+# 2 separate sets not in a dataframe as in cats example
+
+cor.test(player1,player2, method="spearman",exact=FALSE) 
+```
+
+### as you can see, the value of the correlation coefficient is 0.29. moreover, p value is non significant which indicates a non signficant correlation between player 1 snd 2
+
+### to get R2, simply raise the r to power of 2
+
+```{r}
+0.2997068 ^2 # but its meaningless here in spareman as i said earlier
+```
+
+### Now you have r, r2 and p
+
+------------------------------------------------------------------------
+
+## Correlation matrix
+
+### If your data have 2 variables or more and you want to correlate between them you need to use cor() function.
+
+### Lets use mtcars dataset \# datasets package
+
+```{r}
+head(mtcars)
+str(mtcars)# to show how your data looks like. 32 observation, 11 variables.
+
+```
+
+### selecting columns from disp to qsec
+
+```{r}
+cars <- mtcars %>% select(disp,hp,drat,wt,qsec)
+
+# read mtcars, and select x variables(columns), then name it cars.
+
+
+# make sure plyr packge is loaded then dplyr package[of coarse packages needs to be downloaded before loading]
+#library(plyr)
+# library(dplyr)
+# %>%  "piping or chaining" in dplyr package
+```
+
+```{r}
+summary(cars)# to see if your data have NA that might spoil your result
+```
+
+### Lets run the correlation
+
+```{r}
+cor1 <- cor(cars)# default is pearson. 
+print(cor1)# to show result
+```
+
+```{r}
+cor2 <- cor(cars,method = "spearman")
+print(cor2)
+```
+
+> Note: If your data na.rm=TRUE "your data includes missing values or NA", then you need to add ***[use = "na.or.complete"]***
+
+then you can draw a simple correlation matrix
+
+```{r}
+pairs(cars) # note that i plotted here the original data not the correlation result dataset"cor1"
+
+# plot(cars) will give the same result)
+```
+
+# Another package that we can use
+
+#install GGally package
+
+```{r message=FALSE, warning=FALSE, paged.print=FALSE}
+ggpairs(cars)
+```
+
+# you could specify many things
+
+```{r}
+ggpairs(iris, columns = 1:3, aes(colour = Species))
+```
+
+using cor function with several variables returns a table includes r.
+There is no info about R2 or p value
+
+### of course r2 can be easily obtained as earlier
+
+```{r}
+cor1# this is r
+```
+
+```{r}
+cor1^2 # this is R2
+```
+
+### unfourtinatly, we need more steps to calculate p for several variables. but it is not that hard.
+
+### We need to generate the correlation probability then ask R to tabulate the data in a handy table.
+
+### Load these 2 function to generate the correlation probability and generate a flattensquare matrix. Really, you dont need to understand what is inside these function:)
+
+### when calling cor.prob or flattenSquareMatrix, R will do these calculations
+
+### ***first step***, copy and paste these codes one by one. Make sure you can see them on the upper right panel Environment under functions
+
+```{r}
+# these 2 codes can be found in the downloadable material sent to you earlier
+# to generate correlation probability
+
+cor.prob <- function(x) {
+  n <- ncol(x)
+  p.mat <- matrix(NA, n, n)
+  cor.mat <- cor(x, use = "pairwise.complete.obs")
+  
+  for (i in 1:(n - 1)) {
+    for (j in (i + 1):n) {
+      test <- cor.test(x[, i], x[, j])
+      p.mat[i, j] <- p.mat[j, i] <- test$p.value
+    }
+  }
+  dimnames(p.mat) <- dimnames(cor.mat)
+  list(cor = cor.mat, p = p.mat)
+}
+
+```
+
+```{r}
+# ask R to generate readable table
+
+flattenSquareMatrix <- function(cor.prob.result) {
+  cor.mat <- cor.prob.result$cor
+  p.mat <- cor.prob.result$p
+  ut <- upper.tri(cor.mat)
+  
+  data.frame(
+    i = rownames(cor.mat)[row(cor.mat)[ut]],
+    j = colnames(cor.mat)[col(cor.mat)[ut]],
+    cor = cor.mat[ut],
+    p = p.mat[ut]
+  )
+}
+
+
+
+```
+
+### \*\*\* second step\*\*\* lets get the cor of cars data
+
+```{r}
+head(cars)
+cor(cars)
+```
+
+### \*\*\* Third step\*\*\*, lets use the first function to get p value
+
+```{r}
+cor.prob(cars)
+```
+
+### \*\*\* Forth step\*\*\*, lets ask R to tabulate the result in a handy way using the 2nd function
+
+```{r}
+flattenSquareMatrix(cor.prob(cars))
+```
+
+### Now you have a table i and j is your variables, cor is r and p is of course p!
+
+> Bonus professional point: graph it [PerformanceAnalytics package is needed] or GGally (extention of ggplot2) as mentioned earlier.
+> # More graphical tools in graphics module courses.
+
+```{r,warning=FALSE}
+chart.Correlation(cars) # default is pearson
+```
+
+```{r}
+ggpairs(mtcars, columns = 2:6, aes(colour = factor(am)))
+```
+
+```{r}
+ggpairs(iris, columns = 1:3, aes(colour = Species))
+```
+
+# for mtcars, i had to tell R to consider am as factor (not numbers), but i did not do that in the iris data.
+
+# compare previous 2 codes.
+
+```{r}
+ggpairs(iris, aes(colour = Species))
+```
+
+#ggpairs have several layouts, ill put couple of them
+
+```{r}
+ggpairs(
+  iris[, c(1, 3, 4, 2)],
+  upper = list(continuous = "density", combo = "box_no_facet"),
+  lower = list(continuous = "points", combo = "dot_no_facet")
+) # note that i selected and rearranged variables here
+```
+
+```{r}
+ggpairs(
+  iris[, 1:5],
+  mapping = ggplot2::aes(color = Species),
+  upper = list(continuous = wrap("density", alpha = 0.5), combo = "box_no_facet"),
+  lower = list(continuous = wrap("points", alpha = 0.3), combo = wrap("dot_no_facet", alpha = 0.4)),
+  title = "Iris data"
+)
+```
+
+#End of session
